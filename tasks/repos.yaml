@@ -13,6 +13,20 @@
     - satellite-install
     - satellite-install-repos
 
+- name: Ensure subscription-manager is managing repos
+  ansible.builtin.lineinfile:
+    path: "/etc/rhsm/rhsm.conf"
+    line: "manage_repos = 1"
+    regexp: '^manage_repos ='
+  register: manage_repos
+
+- name: Restart rhsm service
+  when: manage_repos.changed
+  ansible.builtin.service:
+    name: rhsm
+    state: restarted
+
+
 - name: Enable Repos for RHEL 8
   become: true
   when: ansible_distribution_major_version == "8"
